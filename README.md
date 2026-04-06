@@ -194,12 +194,12 @@ Authorization: Bearer <your_token>
 ## 📸 Screenshots
 
 ### 📝 Register Page and 🔐 Login Page
-<img width="1147" height="881" alt="Screenshot 2026-04-04 175213" src="https://github.com/user-attachments/assets/d3dcedb6-1d37-45c9-b78e-6084811bb3b9" />
+<img width="500" height="500" alt="Screenshot 2026-04-04 175213" src="https://github.com/user-attachments/assets/d3dcedb6-1d37-45c9-b78e-6084811bb3b9" />
 
 
 ### 📊 Dashboard
-<img width="1887" height="913" alt="Screenshot 2026-04-04 175250" src="https://github.com/user-attachments/assets/b8052d56-13d5-47b0-894c-f07393b399da" />
+<img width="500" height="500" alt="Screenshot 2026-04-04 175250" src="https://github.com/user-attachments/assets/b8052d56-13d5-47b0-894c-f07393b399da" />
 
 
 ### 👮 Postman 
-<img width="1382" height="1018" alt="Screenshot 2026-04-04 175336" src="https://github.com/user-attachments/assets/709bf6b3-04eb-4186-a1a3-cccfc7cae7f1" />
+<img width="500" height="500" alt="Screenshot 2026-04-04 175336" src="https://github.com/user-attachments/assets/709bf6b3-04eb-4186-a1a3-cccfc7cae7f1" />
