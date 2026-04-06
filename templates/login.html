@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finance App</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --sage: #7eb89a;
+    --sage-light: #b8d8c8;
+    --sage-dark: #3d7a5e;
+    --mint: #e8f5ee;
+    --cream: #faf9f6;
+    --warm: #f5f0e8;
+    --text: #1a1a2e;
+    --text-muted: #6b7280;
+    --accent: #e8a87c;
+    --accent-light: #fdf0e6;
+    --card-bg: rgba(255,255,255,0.92);
+    --border: rgba(126,184,154,0.25);
+    --shadow: 0 8px 40px rgba(61,122,94,0.12);
+    --radius: 18px;
+    --radius-sm: 10px;
+    --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .bg-blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(70px);
+    opacity: 0.35;
+    pointer-events: none;
+    animation: float 8s ease-in-out infinite;
+  }
+  .blob1 { width: 420px; height: 420px; background: #b8d8c8; top: -100px; right: -80px; animation-delay: 0s; }
+  .blob2 { width: 300px; height: 300px; background: #f5d5be; bottom: -80px; left: -60px; animation-delay: 3s; }
+  .blob3 { width: 200px; height: 200px; background: #c8d8f5; bottom: 30%; right: 10%; animation-delay: 5s; }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-20px) scale(1.04); }
+  }
+
+  .wrapper {
+    width: 100%;
+    max-width: 420px;
+    padding: 1.5rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .brand {
+    text-align: center;
+    margin-bottom: 2rem;
+    animation: slideDown 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+  .brand-icon {
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, var(--sage-dark), var(--sage));
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 0.75rem;
+    font-size: 24px;
+  }
+  .brand h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.6rem;
+    color: var(--text);
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+  .brand p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 0.3rem;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(12px);
+    animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .tab-row {
+    display: flex;
+    background: var(--warm);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 1.75rem;
+    gap: 4px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 0.55rem;
+    border: none;
+    background: transparent;
+    border-radius: 9px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .tab-btn.active {
+    background: white;
+    color: var(--sage-dark);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  .form-panel { animation: fadeIn 0.3s ease both; }
+  .form-panel.hidden { display: none; }
+
+  .field {
+    margin-bottom: 1rem;
+    position: relative;
+  }
+  .field label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+  .field input, .field select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--mint);
+    border: 1.5px solid transparent;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text);
+    outline: none;
+    transition: var(--transition);
+    -webkit-appearance: none;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--sage);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(126,184,154,0.15);
+  }
+  .field input::placeholder { color: #b0b8c1; }
+  .field select { cursor: pointer; }
+
+  .btn-main {
+    width: 100%;
+    padding: 0.85rem;
+    background: linear-gradient(135deg, var(--sage-dark) 0%, var(--sage) 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    margin-top: 0.5rem;
+    letter-spacing: 0.01em;
+  }
+  .btn-main:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(61,122,94,0.3); }
+  .btn-main:active { transform: translateY(0); }
+
+  .divider {
+    display: flex; align-items: center; gap: 0.75rem;
+    margin: 1.25rem 0;
+  }
+  .divider span {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .toast {
+    position: fixed; top: 1.5rem; right: 1.5rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    z-index: 100;
+    transform: translateY(-10px);
+    opacity: 0;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    max-width: 280px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { background: #e8f5ee; color: var(--sage-dark); border: 1px solid var(--sage-light); }
+  .toast.error { background: #fef0f0; color: #c0392b; border: 1px solid #f5c6c6; }
+</style>
+</head>
+<body>
+
+<div class="bg-blob blob1"></div>
+<div class="bg-blob blob2"></div>
+<div class="bg-blob blob3"></div>
+
+<div id="toast" class="toast"></div>
+
+<div class="wrapper">
+  <div class="brand">
+    <div class="brand-icon">💸</div>
+    <h1>Finflow</h1>
+    <p>Track. Save. Grow.</p>
+  </div>
+
+  <div class="card">
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="switchTab('login')">Sign In</button>
+      <button class="tab-btn" onclick="switchTab('register')">Create Account</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="form-panel" id="loginPanel">
+      <div class="field">
+        <label>Username</label>
+        <input id="login_username" type="text" placeholder="adm">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input id="login_password" type="password" placeholder="123">
+      </div>
+      <button class="btn-main" onclick="login()">Sign In →</button>
+    </div>
+
+    <!-- REGISTER -->
+    <div class="form-panel hidden" id="registerPanel">
+      <div class="field">
+        <label>Username</label>
+        <input id="reg_username" type="text" placeholder="choose a username">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input id="reg_password" type="password" placeholder="••••••••">
+      </div>
+      <div class="field">
+        <label>Role</label>
+        <select id="reg_role">
+          <option value="Viewer">Viewer</option>
+          <option value="Analyst">Analyst</option>
+          <option value="Admin">Admin</option>
+        </select>
+      </div>
+      <button class="btn-main" onclick="register()">Create Account →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const BASE_URL = window.location.origin;
+
+const tabs = document.querySelectorAll('.tab-btn');
+
+function switchTab(tab) {
+  tabs.forEach((b, i) =>
+    b.classList.toggle(
+      'active',
+      (i === 0 && tab === 'login') || (i === 1 && tab === 'register')
+    )
+  );
+
+  document.getElementById('loginPanel').classList.toggle('hidden', tab !== 'login');
+  document.getElementById('registerPanel').classList.toggle('hidden', tab !== 'register');
+}
+
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+function login() {
+  const username = document.getElementById('login_username').value;
+  const password = document.getElementById('login_password').value;
+
+  if (!username || !password) {
+    return showToast('Please fill in all fields', 'error');
+  }
+
+  fetch(`${BASE_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.access_token) {
+        localStorage.setItem('token', data.access_token);
+
+        showToast('Welcome back! Redirecting...');
+
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 1000);
+      } else {
+        showToast(data.msg || 'Login failed', 'error');
+      }
+    })
+    .catch(() => showToast('Connection error', 'error'));
+}
+
+function register() {
+  const username = document.getElementById('reg_username').value;
+  const password = document.getElementById('reg_password').value;
+  const role = document.getElementById('reg_role').value;
+
+  if (!username || !password) {
+    return showToast('Please fill in all fields', 'error');
+  }
+
+  fetch(`${BASE_URL}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password, role })
+  })
+    .then(res => res.json())
+    .then(data => {
+      showToast(data.msg || 'Registered!');
+
+      if (data.msg === 'User registered') {
+        setTimeout(() => switchTab('login'), 1200);
+      }
+    })
+    .catch(() => showToast('Connection error', 'error'));
+}
+</script>
+</body>
+</html>
