@@ -8,7 +8,7 @@ user_bp = Blueprint("users", __name__)
 
 
 # ===============================
-# GET ALL USERS
+# GET ALL USERS (Admin only)
 # ===============================
 @user_bp.route("/", methods=["GET"])
 @jwt_required()
@@ -26,7 +26,7 @@ def get_all_users():
 
 
 # ===============================
-# UPDATE USER ROLE
+# UPDATE USER ROLE (Admin only)
 # ===============================
 @user_bp.route("/<int:id>/role", methods=["PUT"])
 @jwt_required()
@@ -37,16 +37,17 @@ def update_role(id):
     if not data or "role" not in data:
         return jsonify({"msg": "Role is required"}), 400
 
-    user = User.query.get(id)
+    # FIX: normalize to lowercase to match how roles are stored in the DB
+    new_role = data.get("role", "").strip().lower()
+
+    if new_role not in ["viewer", "analyst", "admin"]:
+        return jsonify({"msg": "Invalid role. Must be viewer, analyst, or admin"}), 400
+
+    # FIX: use db.session.get() instead of deprecated Query.get()
+    user = db.session.get(User, id)
 
     if not user:
         return jsonify({"msg": "User not found"}), 404
-
-    valid_roles = ["Viewer", "Analyst", "Admin"]
-    new_role = data.get("role").capitalize()
-
-    if new_role not in valid_roles:
-        return jsonify({"msg": "Invalid role"}), 400
 
     user.role = new_role
     db.session.commit()
@@ -55,7 +56,7 @@ def update_role(id):
 
 
 # ===============================
-# DELETE USER (FIXED 🔥)
+# DELETE USER (Admin only)
 # ===============================
 @user_bp.route("/<int:id>", methods=["DELETE"])
 @jwt_required()
@@ -63,19 +64,19 @@ def update_role(id):
 def delete_user(id):
     current_user_id = int(get_jwt_identity())
 
-    # ❌ Prevent deleting yourself
+    # Prevent admin from deleting themselves
     if current_user_id == id:
         return jsonify({"msg": "You cannot delete yourself"}), 400
 
-    user = User.query.get(id)
+    # FIX: use db.session.get() instead of deprecated Query.get()
+    user = db.session.get(User, id)
 
     if not user:
         return jsonify({"msg": "User not found"}), 404
 
-    # 🔥 DELETE ALL RELATED TRANSACTIONS FIRST
+    # Delete all related transactions first (maintain referential integrity)
     Transaction.query.filter_by(user_id=id).delete()
 
-    # 🔥 DELETE USER
     db.session.delete(user)
     db.session.commit()
 

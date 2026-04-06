@@ -1,25 +1,42 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
-from app.models import Transaction
+from app.models import Transaction, User
 from app.utils.decorators import role_required
 
 finance_bp = Blueprint("finance", __name__)
 
+
+def get_current_user():
+    """Helper to fetch current user from JWT identity."""
+    user_id = int(get_jwt_identity())
+    return db.session.get(User, user_id)
+
+
+# ===============================
 # ADD TRANSACTION
+# ===============================
 @finance_bp.route("/", methods=["POST"])
 @jwt_required()
 def add_transaction():
     data = request.get_json()
+    user_id = int(get_jwt_identity())
 
-    user_id = int(get_jwt_identity())   # ✅ FIX
+    amount = data.get("amount")
+    type_ = data.get("type")
+
+    if not amount or not type_:
+        return jsonify({"msg": "Amount and type are required"}), 400
+
+    if type_ not in ["income", "expense"]:
+        return jsonify({"msg": "Type must be 'income' or 'expense'"}), 400
 
     new_transaction = Transaction(
-        amount=data.get("amount"),
-        type=data.get("type"),
+        amount=amount,
+        type=type_,
         category=data.get("category"),
         notes=data.get("notes"),
-        user_id=user_id   # ✅ FIX
+        user_id=user_id
     )
 
     db.session.add(new_transaction)
@@ -28,7 +45,9 @@ def add_transaction():
     return jsonify({"msg": "Transaction saved"}), 201
 
 
+# ===============================
 # GET TRANSACTIONS
+# ===============================
 @finance_bp.route("/", methods=["GET"])
 @jwt_required()
 def get_transactions():
@@ -36,32 +55,35 @@ def get_transactions():
 
     transactions = Transaction.query.filter_by(user_id=user_id).all()
 
-    result = []
-    for t in transactions:
-        result.append({
-            "id": t.id,
-            "amount": t.amount,
-            "type": t.type,
-            "category": t.category,
-            "notes": t.notes,
-            "date": str(t.date)
-        })
+    result = [{
+        "id": t.id,
+        "amount": t.amount,
+        "type": t.type,
+        "category": t.category,
+        "notes": t.notes,
+        "date": str(t.date)
+    } for t in transactions]
 
     return jsonify({"transactions": result}), 200
 
-# UPDATE TRANSACTION
+
+# ===============================
+# UPDATE TRANSACTION (Admin only)
+# ===============================
 @finance_bp.route("/<int:id>", methods=["PUT"])
 @jwt_required()
-@role_required(["admin"])   # 🔥 ONLY ADMIN
+@role_required(["admin"])
 def update_transaction(id):
-    user_id = int(get_jwt_identity())
-    data = request.get_json()
+    # FIX: use db.session.get() instead of deprecated Query.get()
+    transaction = db.session.get(Transaction, id)
 
-    transaction = Transaction.query.get(id)
-
-    if not transaction or transaction.user_id != user_id:
+    if not transaction:
         return jsonify({"msg": "Transaction not found"}), 404
 
+    # FIX: Admins can update ANY transaction (ownership check removed)
+    # Non-admins cannot reach here due to @role_required(["admin"])
+
+    data = request.get_json()
     transaction.amount = data.get("amount", transaction.amount)
     transaction.type = data.get("type", transaction.type)
     transaction.category = data.get("category", transaction.category)
@@ -71,27 +93,29 @@ def update_transaction(id):
 
     return jsonify({"msg": "Transaction updated"}), 200
 
-# DELETE TRANSACTION
+
+# ===============================
+# DELETE TRANSACTION (Admin only)
+# ===============================
 @finance_bp.route("/<int:id>", methods=["DELETE"])
 @jwt_required()
 @role_required(["admin"])
 def delete_transaction(id):
-    user_id = int(get_jwt_identity())
-
-    transaction = Transaction.query.get(id)
+    # FIX: use db.session.get() instead of deprecated Query.get()
+    transaction = db.session.get(Transaction, id)
 
     if not transaction:
         return jsonify({"msg": "Transaction not found"}), 404
-
-    # ✅ REMOVE THIS RESTRICTION FOR ADMIN
-    # if transaction.user_id != user_id: ❌ REMOVE
 
     db.session.delete(transaction)
     db.session.commit()
 
     return jsonify({"msg": "Transaction deleted"}), 200
 
+
+# ===============================
 # SUMMARY
+# ===============================
 @finance_bp.route("/summary", methods=["GET"])
 @jwt_required()
 @role_required(["admin", "analyst", "viewer"])
@@ -110,7 +134,9 @@ def get_summary():
     }), 200
 
 
-# CATEGORY SUMMARY
+# ===============================
+# CATEGORY SUMMARY (Admin + Analyst)
+# ===============================
 @finance_bp.route("/category-summary", methods=["GET"])
 @jwt_required()
 @role_required(["admin", "analyst"])
@@ -120,17 +146,16 @@ def category_summary():
     transactions = Transaction.query.filter_by(user_id=user_id).all()
 
     result = {}
-
     for t in transactions:
-        if t.category not in result:
-            result[t.category] = 0
-
         if t.type == "expense":
-            result[t.category] += t.amount
+            result[t.category] = result.get(t.category, 0) + t.amount
 
     return jsonify(result), 200
 
-# FILTER
+
+# ===============================
+# FILTER TRANSACTIONS
+# ===============================
 @finance_bp.route("/filter", methods=["GET"])
 @jwt_required()
 def filter_transactions():
@@ -143,7 +168,6 @@ def filter_transactions():
 
     if category:
         query = query.filter_by(category=category)
-
     if type_:
         query = query.filter_by(type=type_)
 
@@ -160,7 +184,9 @@ def filter_transactions():
     return jsonify(result), 200
 
 
+# ===============================
 # MONTHLY SUMMARY
+# ===============================
 @finance_bp.route("/monthly-summary", methods=["GET"])
 @jwt_required()
 def monthly_summary():
@@ -169,9 +195,8 @@ def monthly_summary():
     transactions = Transaction.query.filter_by(user_id=user_id).all()
 
     result = {}
-
     for t in transactions:
-        month = t.date.strftime("%Y-%m")  # 2026-04
+        month = t.date.strftime("%Y-%m")
 
         if month not in result:
             result[month] = {"income": 0, "expense": 0}
@@ -182,7 +207,3 @@ def monthly_summary():
             result[month]["expense"] += t.amount
 
     return jsonify(result), 200
-
-
-
-

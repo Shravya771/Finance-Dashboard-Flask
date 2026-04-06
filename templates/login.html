@@ -194,21 +194,6 @@
   .btn-main:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(61,122,94,0.3); }
   .btn-main:active { transform: translateY(0); }
 
-  .divider {
-    display: flex; align-items: center; gap: 0.75rem;
-    margin: 1.25rem 0;
-  }
-  .divider span {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    white-space: nowrap;
-  }
-  .divider::before, .divider::after {
-    content: ''; flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
   .toast {
     position: fixed; top: 1.5rem; right: 1.5rem;
     padding: 0.75rem 1.25rem;
@@ -252,11 +237,11 @@
     <div class="form-panel" id="loginPanel">
       <div class="field">
         <label>Username</label>
-        <input id="login_username" type="text" placeholder="adm">
+        <input id="login_username" type="text" placeholder="Enter username">
       </div>
       <div class="field">
         <label>Password</label>
-        <input id="login_password" type="password" placeholder="123">
+        <input id="login_password" type="password" placeholder="••••••••">
       </div>
       <button class="btn-main" onclick="login()">Sign In →</button>
     </div>
@@ -265,7 +250,7 @@
     <div class="form-panel hidden" id="registerPanel">
       <div class="field">
         <label>Username</label>
-        <input id="reg_username" type="text" placeholder="choose a username">
+        <input id="reg_username" type="text" placeholder="Choose a username">
       </div>
       <div class="field">
         <label>Password</label>
@@ -273,10 +258,11 @@
       </div>
       <div class="field">
         <label>Role</label>
+        <!-- FIX: values are now lowercase to match backend validation -->
         <select id="reg_role">
-          <option value="Viewer">Viewer</option>
-          <option value="Analyst">Analyst</option>
-          <option value="Admin">Admin</option>
+          <option value="viewer">Viewer</option>
+          <option value="analyst">Analyst</option>
+          <option value="admin">Admin</option>
         </select>
       </div>
       <button class="btn-main" onclick="register()">Create Account →</button>
@@ -286,7 +272,6 @@
 
 <script>
 const BASE_URL = window.location.origin;
-
 const tabs = document.querySelectorAll('.tab-btn');
 
 function switchTab(tab) {
@@ -296,7 +281,6 @@ function switchTab(tab) {
       (i === 0 && tab === 'login') || (i === 1 && tab === 'register')
     )
   );
-
   document.getElementById('loginPanel').classList.toggle('hidden', tab !== 'login');
   document.getElementById('registerPanel').classList.toggle('hidden', tab !== 'register');
 }
@@ -305,12 +289,11 @@ function showToast(msg, type = 'success') {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = `toast ${type} show`;
-
   setTimeout(() => t.classList.remove('show'), 3200);
 }
 
 function login() {
-  const username = document.getElementById('login_username').value;
+  const username = document.getElementById('login_username').value.trim();
   const password = document.getElementById('login_password').value;
 
   if (!username || !password) {
@@ -326,12 +309,8 @@ function login() {
     .then(data => {
       if (data.access_token) {
         localStorage.setItem('token', data.access_token);
-
         showToast('Welcome back! Redirecting...');
-
-        setTimeout(() => {
-          window.location.href = '/dashboard';
-        }, 1000);
+        setTimeout(() => { window.location.href = '/dashboard'; }, 1000);
       } else {
         showToast(data.msg || 'Login failed', 'error');
       }
@@ -340,9 +319,9 @@ function login() {
 }
 
 function register() {
-  const username = document.getElementById('reg_username').value;
+  const username = document.getElementById('reg_username').value.trim();
   const password = document.getElementById('reg_password').value;
-  const role = document.getElementById('reg_role').value;
+  const role = document.getElementById('reg_role').value; // already lowercase
 
   if (!username || !password) {
     return showToast('Please fill in all fields', 'error');
@@ -355,8 +334,7 @@ function register() {
   })
     .then(res => res.json())
     .then(data => {
-      showToast(data.msg || 'Registered!');
-
+      showToast(data.msg || 'Registered!', data.msg === 'User registered' ? 'success' : 'error');
       if (data.msg === 'User registered') {
         setTimeout(() => switchTab('login'), 1200);
       }
