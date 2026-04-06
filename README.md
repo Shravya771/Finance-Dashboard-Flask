@@ -194,13 +194,12 @@ Authorization: Bearer <your_token>
 ## 📸 Screenshots
 
 ### 📝 Register Page and 🔐 Login Page
-<img width="500" height="500" alt="Screenshot 2026-04-04 175213" src="https://github.com/user-attachments/assets/adb1648f-8d2c-4d4e-8a52-e0f323f8b2a8" />
+<img width="1147" height="881" alt="Screenshot 2026-04-04 175213" src="https://github.com/user-attachments/assets/d3dcedb6-1d37-45c9-b78e-6084811bb3b9" />
 
 
 ### 📊 Dashboard
-<img width="500" height="500" alt="Screenshot 2026-04-04 175250" src="https://github.com/user-attachments/assets/bc2c3ae9-c6b7-4bae-b8f5-78d03eda0179" />
+<img width="1887" height="913" alt="Screenshot 2026-04-04 175250" src="https://github.com/user-attachments/assets/b8052d56-13d5-47b0-894c-f07393b399da" />
 
 
 ### 👮 Postman 
-<img width="500" height="500" alt="Screenshot 2026-04-04 175336" src="https://github.com/user-attachments/assets/36e8c99b-3a7b-496b-9e8c-aca5d18e2800" />
-"# FinFlow-finance-dashboard-flask" 
+<img width="1382" height="1018" alt="Screenshot 2026-04-04 175336" src="https://github.com/user-attachments/assets/709bf6b3-04eb-4186-a1a3-cccfc7cae7f1" />
